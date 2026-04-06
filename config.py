@@ -1,0 +1,122 @@
+"""
+config.py — Konfigurasi terpusat untuk proyek Waste Detection
+Ubah nilai di sini untuk menyesuaikan dengan environment kamu.
+"""
+
+import os
+from pathlib import Path
+
+# ─── ROOT PROJECT ──────────────────────────────────────────────────────────────
+ROOT_DIR   = Path(__file__).parent.resolve()
+DATA_DIR   = ROOT_DIR / "data"
+DATASET_DIR= ROOT_DIR / "datasets"
+MODEL_DIR  = ROOT_DIR / "models"
+RUNS_DIR   = ROOT_DIR / "runs"
+OUTPUT_DIR = ROOT_DIR / "outputs"
+
+# Pastikan semua folder ada
+for d in [DATA_DIR, DATASET_DIR, MODEL_DIR, RUNS_DIR, OUTPUT_DIR]:
+    d.mkdir(parents=True, exist_ok=True)
+
+# ─── KELAS SAMPAH (6 kelas utama) ──────────────────────────────────────────────
+# Ini adalah kelas final setelah penyederhanaan dari dataset TACO + Roboflow
+CLASS_NAMES = [
+    "plastic",          # 0 — botol plastik, gelas plastik, sedotan
+    "paper_cardboard",  # 1 — kertas, kardus, kotak
+    "metal",            # 2 — kaleng, logam
+    "glass",            # 3 — botol kaca, pecahan kaca
+    "plastic_bag",      # 4 — kantong plastik, sachet
+    "trash",            # 5 — sampah campuran / tidak teridentifikasi
+]
+NUM_CLASSES = len(CLASS_NAMES)
+
+# Warna bounding box per kelas (BGR untuk OpenCV)
+CLASS_COLORS = {
+    "plastic":         (0,   165, 255),   # oranye
+    "paper_cardboard": (0,   255, 127),   # hijau muda
+    "metal":           (180, 180, 0  ),   # cyan gelap
+    "glass":           (255, 100, 100),   # biru muda
+    "plastic_bag":     (147, 20,  255),   # ungu
+    "trash":           (0,   0,   200),   # merah gelap
+}
+
+# ─── MODEL ─────────────────────────────────────────────────────────────────────
+# Pilih: "yolov8n.pt" atau "yolo11n.pt"
+# YOLOv8n  → lebih mature, banyak referensi, cocok production demo
+# YOLO11n  → arsitektur terbaru Ultralytics, sedikit lebih akurat, ekosistem berkembang
+BASE_MODEL      = "yolov8n.pt"   # pre-trained COCO, akan di-fine-tune
+TRAINED_MODEL   = MODEL_DIR / "best.pt"  # path model hasil training
+DATASET_YAML    = DATASET_DIR / "waste_dataset.yaml"
+
+# ─── TRAINING ──────────────────────────────────────────────────────────────────
+TRAIN_CONFIG = {
+    "epochs"       : 80,        # cukup untuk fine-tune; naikkan ke 150 kalau data banyak
+    "batch"        : 16,        # turunkan ke 8 jika RAM GPU < 4 GB
+    "imgsz"        : 640,       # standar YOLO; turunkan ke 416 jika lambat
+    "lr0"          : 0.01,      # learning rate awal
+    "lrf"          : 0.01,      # final lr ratio
+    "momentum"     : 0.937,
+    "weight_decay" : 0.0005,
+    "warmup_epochs": 3,
+    "patience"     : 20,        # early stopping
+    "device"       : "0" if os.environ.get("CUDA_VISIBLE_DEVICES") else "cpu",
+    "workers"      : 4,
+    "project"      : str(RUNS_DIR),
+    "name"         : "waste_detection",
+    "exist_ok"     : True,
+    "pretrained"   : True,
+    "optimizer"    : "AdamW",
+    "verbose"      : True,
+    "seed"         : 42,
+    "val"          : True,
+    # Augmentasi — penting untuk dataset sampah yang beragam
+    "hsv_h"        : 0.015,
+    "hsv_s"        : 0.7,
+    "hsv_v"        : 0.4,
+    "degrees"      : 10.0,
+    "translate"    : 0.1,
+    "scale"        : 0.5,
+    "shear"        : 2.0,
+    "flipud"       : 0.1,
+    "fliplr"       : 0.5,
+    "mosaic"       : 1.0,
+    "mixup"        : 0.1,
+    "copy_paste"   : 0.1,
+}
+
+# ─── INFERENCE ─────────────────────────────────────────────────────────────────
+INFERENCE_CONFIG = {
+    "conf"     : 0.35,   # threshold confidence; turunkan ke 0.25 jika banyak miss
+    "iou"      : 0.45,   # IoU threshold untuk NMS
+    "imgsz"    : 640,
+    "max_det"  : 50,     # max deteksi per frame
+    "device"   : "cpu",  # ganti "0" jika ada GPU
+    "verbose"  : False,
+}
+
+# ─── OUTPUT ────────────────────────────────────────────────────────────────────
+SAVE_CSV    = True
+SAVE_JSON   = True
+OUTPUT_CSV  = OUTPUT_DIR / "detections.csv"
+OUTPUT_JSON = OUTPUT_DIR / "detections.json"
+
+# ─── DATASET SPLIT ─────────────────────────────────────────────────────────────
+TRAIN_RATIO = 0.75
+VAL_RATIO   = 0.15
+TEST_RATIO  = 0.10
+RANDOM_SEED = 42
+
+# ─── ROBOFLOW DATASET ──────────────────────────────────────────────────────────
+# Dataset: "Garbage Classification" by Roboflow Universe
+# URL: https://universe.roboflow.com/material-identification/garbage-classification-3
+# Versi: 2  |  Format: YOLOv8
+ROBOFLOW_WORKSPACE = "material-identification"
+ROBOFLOW_PROJECT   = "garbage-classification-3"
+ROBOFLOW_VERSION   = 2
+
+# ─── TACO DATASET ──────────────────────────────────────────────────────────────
+# URL: http://tacodataset.org/
+# GitHub: https://github.com/pedropro/TACO
+TACO_ANNOTATIONS_URL = "https://raw.githubusercontent.com/pedropro/TACO/master/data/annotations.json"
+TACO_IMAGES_DIR      = DATA_DIR / "taco" / "images"
+TACO_ANNO_FILE       = DATA_DIR / "taco" / "annotations.json"

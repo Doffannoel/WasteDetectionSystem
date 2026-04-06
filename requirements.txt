@@ -1,0 +1,37 @@
+# requirements.txt — Waste Detection System
+# Install: pip install -r requirements.txt
+
+# ── Core YOLO framework ──────────────────────────────────────
+ultralytics>=8.3.0          # YOLOv8 + YOLO11 (satu paket)
+
+# ── Computer vision ──────────────────────────────────────────
+opencv-python>=4.8.0        # membaca dan menulis gambar/video
+Pillow>=10.0.0              # pemrosesan gambar
+
+# ── Data science ─────────────────────────────────────────────
+numpy>=1.24.0
+pandas>=2.0.0               # analisis data & CSV
+matplotlib>=3.7.0           # visualisasi
+seaborn>=0.12.0             # confusion matrix yang cantik
+PyYAML>=6.0                 # baca/tulis YAML config
+
+# ── Dataset download ─────────────────────────────────────────
+roboflow>=1.1.0             # download dataset dari Roboflow
+requests>=2.31.0
+
+# ── ML utilities ─────────────────────────────────────────────
+scikit-learn>=1.3.0         # metrics, train/test split
+tqdm>=4.65.0                # progress bar
+
+# ── Optional: GPU acceleration ───────────────────────────────
+# Jika punya GPU NVIDIA, install PyTorch dengan CUDA:
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+# atau cu121 untuk CUDA 12.1
+# 
+# CPU only (default):
+torch>=2.0.0
+torchvision>=0.15.0
+
+# ── Optional: Export ke ONNX ─────────────────────────────────
+# onnx>=1.14.0
+# onnxruntime>=1.16.0
