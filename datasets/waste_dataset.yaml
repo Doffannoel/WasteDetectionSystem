@@ -1,0 +1,19 @@
+# waste_dataset.yaml — Konfigurasi dataset untuk YOLO training
+# Di-generate otomatis oleh prepare_dataset.py
+
+path: C:\Kuliah\Semester 6\Big Data for Social Media Campaign\waste-detection\WasteDetectionSystem\datasets\final
+
+train: train/images
+val:   val/images
+test:  test/images
+
+nc: 6
+names: ['plastic', 'paper_cardboard', 'metal', 'glass', 'plastic_bag', 'trash']
+
+# Catatan kelas:
+# 0 - plastic        : botol plastik, gelas plastik, wadah plastik
+# 1 - paper_cardboard: kertas, kardus, kotak
+# 2 - metal          : kaleng, logam, foil
+# 3 - glass          : botol kaca, pecahan kaca
+# 4 - plastic_bag    : kantong plastik, sachet, bungkus
+# 5 - trash          : sampah campuran, tidak teridentifikasi

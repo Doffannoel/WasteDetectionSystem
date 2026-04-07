@@ -1,0 +1,69 @@
+﻿# =========================
+# Python cache / build
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# =========================
+# Virtual environment
+# =========================
+.venv/
+venv/
+env/
+
+# =========================
+# IDE / OS files
+# =========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# =========================
+# Secrets / local config
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Dataset & generated data
+# =========================
+data/
+datasets/*
+!datasets/waste_dataset.yaml
+!datasets/.gitkeep
+
+# =========================
+# Training / inference outputs
+# =========================
+runs/
+outputs/
+
+# =========================
+# Model artifacts / weights
+# =========================
+models/*.pt
+models/*.onnx
+models/*.engine
+models/*.tflite
+models/*.mlmodel
+models/*.torchscript
+
+# Common weights/artifacts in project root
+*.pt
+*.onnx
+*.engine
+*.tflite
+*.mlmodel
+*.torchscript
+
+# Archives / logs
+*.zip
+*.log
