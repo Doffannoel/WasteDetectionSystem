@@ -42,7 +42,7 @@ def draw_detections(
     fps: Optional[float] = None,
 ) -> Tuple[np.ndarray, Dict[str, int]]:
     """
-    Gambar bounding box, label, dan confidence pada frame.
+    Gambar bounding box, label, dan confidence (ditampilkan sebagai "Akurasi %") pada frame.
     
     Returns:
         frame       — frame dengan anotasi
@@ -69,8 +69,9 @@ def draw_detections(
         # Gambar bounding box
         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-        # Label background
-        label    = f"{cls_name} {conf:.2f}"
+        # Tampilkan confidence model dalam persen agar mudah dibaca user.
+        conf_pct = conf * 100.0
+        label    = f"{cls_name} | Akurasi: {conf_pct:.1f}%"
         (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.55, 1)
         top_left     = (x1, max(y1 - th - 6, 0))
         bottom_right = (x1 + tw + 4, max(y1, th + 6))

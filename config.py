@@ -1,4 +1,4 @@
-﻿"""
+"""
 config.py â€” Konfigurasi terpusat untuk proyek Waste Detection
 Ubah nilai di sini untuk menyesuaikan dengan environment kamu.
 """

@@ -1,5 +1,5 @@
-"""
-predict.py — Inference realtime untuk Waste Detection
+﻿"""
+predict.py â€” Inference realtime untuk Waste Detection
 
 Mendukung:
   - Gambar        : python predict.py --source foto.jpg
@@ -39,30 +39,30 @@ from utils import (
 )
 
 
-# ─── LOAD MODEL ────────────────────────────────────────────────────────────────
+# â”€â”€â”€ LOAD MODEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def load_model(model_path: str | None = None):
     """Load YOLO model dari path yang ditentukan."""
     try:
         from ultralytics import YOLO
     except ImportError:
-        logger.error("❌ ultralytics tidak terinstall: pip install ultralytics")
+        logger.error("âŒ ultralytics tidak terinstall: pip install ultralytics")
         sys.exit(1)
 
     path = model_path or str(TRAINED_MODEL)
 
     # Kalau belum ada trained model, gunakan base model sebagai fallback
     if not Path(path).exists():
-        logger.warning(f"⚠️  Model tidak ditemukan: {path}")
+        logger.warning(f"âš ï¸  Model tidak ditemukan: {path}")
         logger.info("   Menggunakan YOLOv8n pre-trained (COCO) sebagai fallback.")
         logger.info("   Jalankan python train.py untuk training model custom.")
         path = "yolov8n.pt"
 
-    logger.info(f"📦 Load model: {path}")
+    logger.info(f"ðŸ“¦ Load model: {path}")
     model = YOLO(path)
     return model
 
 
-# ─── INFERENCE IMAGE ───────────────────────────────────────────────────────────
+# â”€â”€â”€ INFERENCE IMAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def predict_image(
     model,
     image_path: str,
@@ -73,14 +73,14 @@ def predict_image(
     """Inference pada satu gambar."""
     img_path = Path(image_path)
     if not img_path.exists():
-        logger.error(f"❌ File tidak ditemukan: {image_path}")
+        logger.error(f"âŒ File tidak ditemukan: {image_path}")
         return
 
-    logger.info(f"🖼️  Inference gambar: {image_path}")
+    logger.info(f"ðŸ–¼ï¸  Inference gambar: {image_path}")
 
     frame = cv2.imread(str(img_path))
     if frame is None:
-        logger.error(f"❌ Gagal membaca gambar: {image_path}")
+        logger.error(f"âŒ Gagal membaca gambar: {image_path}")
         return
 
     # Jalankan prediksi
@@ -106,7 +106,7 @@ def predict_image(
     if save_output:
         out_path = get_output_path(str(img_path), suffix=".jpg")
         cv2.imwrite(str(out_path), annotated)
-        logger.info(f"✅ Hasil disimpan: {out_path}")
+        logger.info(f"âœ… Hasil disimpan: {out_path}")
 
     # Tampilkan
     if show:
@@ -115,11 +115,11 @@ def predict_image(
         cv2.destroyAllWindows()
 
     # Ringkasan
-    logger.info(f"📊 Terdeteksi: {count_dict}")
+    logger.info(f"ðŸ“Š Terdeteksi: {count_dict}")
     return count_dict
 
 
-# ─── INFERENCE VIDEO / WEBCAM ──────────────────────────────────────────────────
+# â”€â”€â”€ INFERENCE VIDEO / WEBCAM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def predict_stream(
     model,
     source: str,
@@ -134,20 +134,20 @@ def predict_stream(
     Inference realtime pada video file, webcam, atau RTSP stream.
     
     Args:
-        source       — "0" untuk webcam, path file, atau rtsp://...
-        log_interval — simpan hasil ke CSV/JSON setiap N frame
+        source       â€” "0" untuk webcam, path file, atau rtsp://...
+        log_interval â€” simpan hasil ke CSV/JSON setiap N frame
     """
     # Buka sumber video
     if source == "0" or source.isdigit():
         src = int(source)
-        logger.info(f"📹 Membuka webcam {src}...")
+        logger.info(f"ðŸ“¹ Membuka webcam {src}...")
     else:
         src = source
-        logger.info(f"📹 Membuka video: {source}")
+        logger.info(f"ðŸ“¹ Membuka video: {source}")
 
     cap = cv2.VideoCapture(src)
     if not cap.isOpened():
-        logger.error(f"❌ Gagal membuka sumber video: {source}")
+        logger.error(f"âŒ Gagal membuka sumber video: {source}")
         if source == "0":
             logger.info("   Pastikan webcam terhubung dan tidak dipakai aplikasi lain.")
         return
@@ -165,13 +165,18 @@ def predict_stream(
         out_path.parent.mkdir(parents=True, exist_ok=True)
         fourcc   = cv2.VideoWriter_fourcc(*"mp4v")
         writer   = cv2.VideoWriter(str(out_path), fourcc, fps_in, (width, height))
-        logger.info(f"💾 Output video: {out_path}")
+        logger.info(f"ðŸ’¾ Output video: {out_path}")
 
     fps_counter = FPSCounter(window=30)
     frame_count = 0
     total_detections = 0
+    window_name = "Waste Detection - tekan Q untuk keluar"
 
-    logger.info("▶️  Inference dimulai. Tekan 'q' untuk berhenti.")
+    logger.info("â–¶ï¸  Inference dimulai. Tekan 'q' untuk berhenti.")
+
+    if show:
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     try:
         while True:
@@ -183,7 +188,7 @@ def predict_stream(
             frame_count  += 1
             ts            = datetime.now().isoformat()
 
-            # ── Inference ──
+            # â”€â”€ Inference â”€â”€
             results = model.predict(
                 source  = frame,
                 conf    = conf,
@@ -201,7 +206,7 @@ def predict_stream(
             total_obj           = sum(count_dict.values())
             total_detections   += total_obj
 
-            # ── Simpan ke CSV/JSON setiap N frame ──
+            # â”€â”€ Simpan ke CSV/JSON setiap N frame â”€â”€
             if frame_count % log_interval == 0:
                 if save_csv:
                     save_detection_csv(source=source, count_dict=count_dict, timestamp=ts)
@@ -211,23 +216,23 @@ def predict_stream(
                         boxes_raw=boxes, timestamp=ts
                     )
 
-            # ── Tulis ke output video ──
+            # â”€â”€ Tulis ke output video â”€â”€
             if writer:
                 writer.write(annotated)
 
-            # ── Tampilkan frame ──
+            # â”€â”€ Tampilkan frame â”€â”€
             if show:
-                cv2.imshow("Waste Detection — tekan Q untuk keluar", annotated)
+                cv2.imshow(window_name, annotated)
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord("q") or key == 27:  # Q atau ESC
-                    logger.info("⏹️  Dihentikan oleh user.")
+                    logger.info("â¹ï¸  Dihentikan oleh user.")
                     break
                 # Pause dengan spasi
                 elif key == ord(" "):
                     cv2.waitKey(0)
 
     except KeyboardInterrupt:
-        logger.info("\n⏹️  Dihentikan (Ctrl+C).")
+        logger.info("\nâ¹ï¸  Dihentikan (Ctrl+C).")
 
     finally:
         cap.release()
@@ -236,12 +241,12 @@ def predict_stream(
         cv2.destroyAllWindows()
 
     # Statistik akhir
-    logger.info("\n" + "─" * 40)
-    logger.info("📊 Statistik Inference:")
+    logger.info("\n" + "â”€" * 40)
+    logger.info("ðŸ“Š Statistik Inference:")
     logger.info(f"   Total frame    : {frame_count}")
     logger.info(f"   Total deteksi  : {total_detections}")
     logger.info(f"   Rata-rata FPS  : {fps:.1f}")
-    logger.info("─" * 40)
+    logger.info("â”€" * 40)
 
     from config import OUTPUT_CSV, OUTPUT_JSON
     if save_csv:
@@ -250,7 +255,7 @@ def predict_stream(
         logger.info(f"   JSON disimpan ke: {OUTPUT_JSON}")
 
 
-# ─── INFERENCE BATCH ───────────────────────────────────────────────────────────
+# â”€â”€â”€ INFERENCE BATCH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def predict_folder(
     model,
     folder_path: str,
@@ -260,15 +265,15 @@ def predict_folder(
     """Inference batch pada semua gambar dalam folder."""
     folder = Path(folder_path)
     if not folder.exists():
-        logger.error(f"❌ Folder tidak ditemukan: {folder_path}")
+        logger.error(f"âŒ Folder tidak ditemukan: {folder_path}")
         return
 
     images = list(folder.glob("*.jpg")) + list(folder.glob("*.png")) + list(folder.glob("*.jpeg"))
     if not images:
-        logger.warning(f"⚠️  Tidak ada gambar ditemukan di: {folder_path}")
+        logger.warning(f"âš ï¸  Tidak ada gambar ditemukan di: {folder_path}")
         return
 
-    logger.info(f"📁 Batch inference: {len(images)} gambar")
+    logger.info(f"ðŸ“ Batch inference: {len(images)} gambar")
     out_dir = get_output_path(str(folder))
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -276,13 +281,13 @@ def predict_folder(
         logger.info(f"  [{i}/{len(images)}] {img_path.name}")
         predict_image(model, str(img_path), save_output=save_output, show=False)
 
-    logger.info(f"✅ Batch selesai. Output: {out_dir}")
+    logger.info(f"âœ… Batch selesai. Output: {out_dir}")
 
 
-# ─── MAIN ──────────────────────────────────────────────────────────────────────
+# â”€â”€â”€ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def main():
     parser = argparse.ArgumentParser(
-        description="Waste Detection — Inference",
+        description="Waste Detection â€” Inference",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Contoh penggunaan:
@@ -316,7 +321,7 @@ Contoh penggunaan:
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info("🗑️  Waste Detection — Inference")
+    logger.info("ðŸ—‘ï¸  Waste Detection â€” Inference")
     logger.info("=" * 60)
 
     # Load model
