@@ -49,12 +49,12 @@ outputs/
 # =========================
 # Model artifacts / weights
 # =========================
-models/*.pt
-models/*.onnx
-models/*.engine
-models/*.tflite
-models/*.mlmodel
-models/*.torchscript
+# models/*.pt
+# models/*.onnx
+# models/*.engine
+# models/*.tflite
+# models/*.mlmodel
+# models/*.torchscript
 
 # Common weights/artifacts in project root
 *.pt
