@@ -332,5 +332,5 @@ MIT License. Dataset TACO dan Roboflow memiliki lisensi masing-masing — cek we
 
 ---
 
-*Dibuat untuk keperluan edukasi, demo, dan prototype.*
-*"Code is Solitude" 🧘*
+*Dibuat untuk keperluan mata kuliah Big Data in Social Media Campaign.*
+*"Doffannoel Sihotang, I Dewa Made Adi Kresna, Iqbal Zahid Abdullah Haris" 🧘*
