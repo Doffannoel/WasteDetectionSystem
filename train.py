@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 from config import (
-    BASE_MODEL, DATASET_YAML, MODEL_DIR,
+    BASE_MODEL, CLASS_NAMES, DATASET_YAML, MODEL_DIR, OUTPUT_IMAGE_DIR,
     RUNS_DIR, TRAIN_CONFIG, TRAINED_MODEL,
 )
 from utils import logger
@@ -151,12 +151,13 @@ def evaluate(model_path: str | None = None):
 
     # Metrik per kelas
     logger.info("\n📊 Metrik per kelas:")
-    from config import CLASS_NAMES
     if hasattr(metrics.box, "ap_class_index"):
         for i, cls_idx in enumerate(metrics.box.ap_class_index):
             cls_name = CLASS_NAMES[cls_idx] if cls_idx < len(CLASS_NAMES) else f"class_{cls_idx}"
             ap50 = metrics.box.ap50[i] if hasattr(metrics.box, "ap50") else 0
             logger.info(f"   {cls_name:20s} AP50: {ap50:.4f}")
+
+    logger.info(f"   Confusion matrix & plot evaluasi tersimpan di: {RUNS_DIR / 'detect' / 'val'}")
 
     # Saran jika performa rendah
     if metrics.box.map50 < 0.4:
@@ -170,6 +171,51 @@ def evaluate(model_path: str | None = None):
         )
 
     return metrics
+
+
+def export_sample_predictions(
+    model_path: str | None = None,
+    max_images: int = 12,
+):
+    """
+    Simpan contoh hasil prediksi bergambar ke folder khusus untuk bahan laporan/demonstrasi.
+    """
+    from ultralytics import YOLO
+
+    path = model_path or str(TRAINED_MODEL)
+    if not Path(path).exists():
+        logger.error(f"❌ Model tidak ditemukan untuk export gambar: {path}")
+        return
+
+    test_img_dir = DATASET_YAML.parent / "final" / "test" / "images"
+    if not test_img_dir.exists():
+        logger.warning(f"⚠️ Folder test images tidak ditemukan: {test_img_dir}")
+        return
+
+    image_files = sorted(
+        [p for p in test_img_dir.iterdir() if p.suffix.lower() in {'.jpg', '.jpeg', '.png'}]
+    )[:max_images]
+
+    if not image_files:
+        logger.warning("⚠️ Tidak ada gambar test untuk dibuatkan output bounding box.")
+        return
+
+    OUTPUT_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+    logger.info(f"\n🖼️ Menyimpan contoh hasil prediksi ke: {OUTPUT_IMAGE_DIR}")
+
+    model = YOLO(path)
+    model.predict(
+        source=[str(p) for p in image_files],
+        conf=0.25,
+        imgsz=TRAIN_CONFIG["imgsz"],
+        device=TRAIN_CONFIG["device"],
+        save=True,
+        project=str(OUTPUT_IMAGE_DIR),
+        name="sample_test",
+        exist_ok=True,
+        verbose=False,
+    )
+    logger.info(f"✅ Contoh output gambar tersimpan di: {OUTPUT_IMAGE_DIR / 'sample_test'}")
 
 
 def export_model(format: str = "onnx"):
@@ -217,9 +263,11 @@ def main():
         results = train(resume=args.resume)
         logger.info("\n🏁 Training selesai! Evaluasi pada test set...")
         evaluate()
+        export_sample_predictions()
         logger.info("\n✅ Semua selesai!")
         logger.info(f"   Model: {TRAINED_MODEL}")
         logger.info(f"   Runs : {RUNS_DIR / 'waste_detection'}")
+        logger.info(f"   Gambar hasil: {OUTPUT_IMAGE_DIR / 'sample_test'}")
         logger.info("\n🚀 Jalankan inference: python predict.py --source 0  (webcam)")
 
 

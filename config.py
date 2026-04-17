@@ -43,44 +43,44 @@ for d in [DATA_DIR, DATASET_DIR, MODEL_DIR, RUNS_DIR, OUTPUT_DIR]:
 # ---------------- KELAS SAMPAH (6 kelas utama) ----------------
 # Ini adalah kelas final setelah penyederhanaan dari dataset TACO + Roboflow
 CLASS_NAMES = [
-    "plastic",          # 0 - botol plastik, gelas plastik, sedotan
-    "paper_cardboard",  # 1 - kertas, kardus, kotak
-    "metal",            # 2 - kaleng, logam
-    "glass",            # 3 - botol kaca, pecahan kaca
-    "plastic_bag",      # 4 - kantong plastik, sachet
-    "trash",            # 5 - sampah campuran / tidak teridentifikasi
+    "plastik",          # 0 - botol plastik, gelas plastik, sedotan
+    "kertas_kardus",    # 1 - kertas, kardus, kotak
+    "logam",            # 2 - kaleng, logam
+    "kaca",             # 3 - botol kaca, pecahan kaca
+    "kantong_plastik",  # 4 - kantong plastik, sachet
+    "sampah",           # 5 - sampah campuran / tidak teridentifikasi
 ]
 NUM_CLASSES = len(CLASS_NAMES)
 
 # Warna bounding box per kelas (BGR untuk OpenCV)
 CLASS_COLORS = {
-    "plastic":         (0,   165, 255),   # oranye
-    "paper_cardboard": (0,   255, 127),   # hijau muda
-    "metal":           (180, 180, 0  ),   # cyan gelap
-    "glass":           (255, 100, 100),   # biru muda
-    "plastic_bag":     (147, 20,  255),   # ungu
-    "trash":           (0,   0,   200),   # merah gelap
+    "plastik":         (0,   165, 255),   # oranye
+    "kertas_kardus":   (0,   255, 127),   # hijau muda
+    "logam":           (180, 180, 0  ),   # cyan gelap
+    "kaca":            (255, 100, 100),   # biru muda
+    "kantong_plastik": (147, 20,  255),   # ungu
+    "sampah":          (0,   0,   200),   # merah gelap
 }
 
 # ---------------- MODEL ----------------
 # Pilih: "yolov8n.pt" atau "yolo11n.pt"
 # YOLOv8n -> lebih mature, banyak referensi, cocok production demo
 # YOLO11n -> arsitektur terbaru Ultralytics, sedikit lebih akurat, ekosistem berkembang
-BASE_MODEL      = "yolov8n.pt"   # pre-trained COCO, akan di-fine-tune
+BASE_MODEL      = "yolov8s.pt"   # model sedikit lebih besar untuk akurasi lebih baik
 TRAINED_MODEL   = MODEL_DIR / "best.pt"  # path model hasil training
 DATASET_YAML    = DATASET_DIR / "waste_dataset.yaml"
 
 # ---------------- TRAINING ----------------
 TRAIN_CONFIG = {
-    "epochs"       : 80,        # cukup untuk fine-tune; naikkan ke 150 kalau data banyak
+    "epochs"       : 140,       # ditambah agar training punya waktu belajar lebih stabil
     "batch"        : 16,        # turunkan ke 8 jika RAM GPU < 4 GB
-    "imgsz"        : 640,       # standar YOLO; turunkan ke 416 jika lambat
+    "imgsz"        : 736,       # sedikit lebih besar untuk bantu detail objek
     "lr0"          : 0.01,      # learning rate awal
     "lrf"          : 0.01,      # final lr ratio
     "momentum"     : 0.937,
     "weight_decay" : 0.0005,
     "warmup_epochs": 3,
-    "patience"     : 20,        # early stopping
+    "patience"     : 30,        # beri ruang lebih untuk model membaik
     "device"       : AUTO_DEVICE,
     "workers"      : 4,
     "project"      : str(RUNS_DIR),
@@ -103,8 +103,8 @@ TRAIN_CONFIG = {
     "flipud"       : 0.1,
     "fliplr"       : 0.5,
     "mosaic"       : 1.0,
-    "mixup"        : 0.1,
-    "copy_paste"   : 0.1,
+    "mixup"        : 0.15,
+    "copy_paste"   : 0.15,
 }
 
 # ---------------- INFERENCE ----------------
@@ -116,7 +116,7 @@ INFERENCE_CONFIG = {
     "device"   : AUTO_DEVICE,  # ganti "0" jika ada GPU
     "verbose"  : False,
     # Filter tambahan agar objek aneh (misal muka) tidak terdeteksi
-    "ignore_classes" : ["trash"],  # jangan tampilkan kelas ini
+    "ignore_classes" : ["sampah"],  # jangan tampilkan kelas ini
     "min_area_ratio" : 0.005,       # terlalu kecil -> buang
     "max_area_ratio" : 0.60,        # terlalu besar -> buang
 }
@@ -126,6 +126,7 @@ SAVE_CSV    = True
 SAVE_JSON   = True
 OUTPUT_CSV  = OUTPUT_DIR / "detections.csv"
 OUTPUT_JSON = OUTPUT_DIR / "detections.json"
+OUTPUT_IMAGE_DIR = OUTPUT_DIR / "hasil_gambar_bbox"
 
 # ---------------- DATASET SPLIT ----------------
 TRAIN_RATIO = 0.75

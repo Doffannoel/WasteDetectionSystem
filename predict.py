@@ -37,7 +37,7 @@ from config import (
     SAVE_CSV, SAVE_JSON,
 )
 from utils import (
-    FPSCounter, draw_detections, get_output_path,
+    FPSCounter, draw_detections, get_output_image_path, get_output_path,
     logger, save_detection_csv, save_detection_json,
 )
 
@@ -595,7 +595,7 @@ def predict_image(model, image_path, save_output=True,
                         boxes_raw=boxes, timestamp=ts)
 
     if save_output:
-        out_path = get_output_path(str(img_path), suffix=".jpg")
+        out_path = get_output_image_path(str(img_path), suffix=".jpg")
         cv2.imwrite(str(out_path), annotated)
         logger.info(f"Hasil disimpan: {out_path}")
 
@@ -611,7 +611,8 @@ def predict_image(model, image_path, save_output=True,
 # --- INFERENCE VIDEO / RTSP --------------------------------------------------
 def predict_stream(model, source, save_output=True,
                    conf=INFERENCE_CONFIG["conf"], show=True,
-                   save_csv=SAVE_CSV, save_json=SAVE_JSON, log_interval=30):
+                   save_csv=SAVE_CSV, save_json=SAVE_JSON, log_interval=30,
+                   snapshot_interval=90):
     if isinstance(source, str) and (source == "0" or source.isdigit()):
         src = int(source)
     elif isinstance(source, int):
@@ -631,6 +632,7 @@ def predict_stream(model, source, save_output=True,
     logger.info(f"Resolusi: {width}x{height} @ {fps_in:.0f}fps")
 
     writer = None
+    last_snapshot_path = None
     if save_output:
         out_path = get_output_path(str(source), suffix=".mp4")
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -676,6 +678,9 @@ def predict_stream(model, source, save_output=True,
                 if save_json:
                     save_detection_json(source=str(source), count_dict=count_dict,
                                         boxes_raw=boxes, timestamp=ts)
+            if save_output and sum(count_dict.values()) > 0 and frame_count % snapshot_interval == 0:
+                last_snapshot_path = get_output_image_path(f"{source}_frame_{frame_count}", suffix=".jpg")
+                cv2.imwrite(str(last_snapshot_path), annotated)
             if writer:
                 writer.write(annotated)
             if show:
@@ -695,6 +700,8 @@ def predict_stream(model, source, save_output=True,
         cv2.destroyAllWindows()
 
     logger.info(f"Frame: {frame_count} | Deteksi: {total_det} | FPS: {fps:.1f}")
+    if last_snapshot_path:
+        logger.info(f"Jepretan bounding box terakhir: {last_snapshot_path}")
 
 
 # --- INFERENCE BATCH ---------------------------------------------------------

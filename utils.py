@@ -14,7 +14,10 @@ from typing import Dict, List, Optional, Tuple
 import cv2
 import numpy as np
 
-from config import CLASS_COLORS, CLASS_NAMES, OUTPUT_CSV, OUTPUT_JSON, SAVE_CSV, SAVE_JSON
+from config import (
+    CLASS_COLORS, CLASS_NAMES, OUTPUT_CSV, OUTPUT_IMAGE_DIR, OUTPUT_JSON,
+    SAVE_CSV, SAVE_JSON,
+)
 
 # ─── LOGGING ───────────────────────────────────────────────────────────────────
 def setup_logger(name: str = "waste_detection", level: int = logging.INFO) -> logging.Logger:
@@ -230,87 +233,87 @@ class FPSCounter:
 # Mapping dari label TACO asli (60+ kelas) ke 6 kelas yang disederhanakan
 TACO_LABEL_MAP = {
     # PLASTIC
-    "Plastic bottle"             : "plastic",
-    "Plastic bottle cap"         : "plastic",
-    "Plastic cup"                : "plastic",
-    "Plastic lid"                : "plastic",
-    "Plastic straw"              : "plastic",
-    "Plastic utensils"           : "plastic",
-    "Disposable plastic cup"     : "plastic",
-    "Plastic film"               : "plastic_bag",
-    "Single-use carrier bag"     : "plastic_bag",
-    "Polypropylene bag"          : "plastic_bag",
-    "Plastic bag & wrapper"      : "plastic_bag",
-    "Six pack rings"             : "plastic",
-    "Tupperware"                 : "plastic",
-    "Other plastic"              : "plastic",
-    "Other plastic bottle"       : "plastic",
-    "Clear plastic bottle"       : "plastic",
-    "Plastic gloves"             : "plastic",
-    "Plastic pipe"               : "plastic",
+    "Plastic bottle"             : "plastik",
+    "Plastic bottle cap"         : "plastik",
+    "Plastic cup"                : "plastik",
+    "Plastic lid"                : "plastik",
+    "Plastic straw"              : "plastik",
+    "Plastic utensils"           : "plastik",
+    "Disposable plastic cup"     : "plastik",
+    "Plastic film"               : "kantong_plastik",
+    "Single-use carrier bag"     : "kantong_plastik",
+    "Polypropylene bag"          : "kantong_plastik",
+    "Plastic bag & wrapper"      : "kantong_plastik",
+    "Six pack rings"             : "plastik",
+    "Tupperware"                 : "plastik",
+    "Other plastic"              : "plastik",
+    "Other plastic bottle"       : "plastik",
+    "Clear plastic bottle"       : "plastik",
+    "Plastic gloves"             : "plastik",
+    "Plastic pipe"               : "plastik",
 
     # PAPER / CARDBOARD
-    "Paper"                      : "paper_cardboard",
-    "Cardboard"                  : "paper_cardboard",
-    "Paper bag"                  : "paper_cardboard",
-    "Paper cup"                  : "paper_cardboard",
-    "Wrapping paper"             : "paper_cardboard",
-    "Paper straw"                : "paper_cardboard",
-    "Newspaper"                  : "paper_cardboard",
-    "Tissues"                    : "paper_cardboard",
-    "Magazine paper"             : "paper_cardboard",
+    "Paper"                      : "kertas_kardus",
+    "Cardboard"                  : "kertas_kardus",
+    "Paper bag"                  : "kertas_kardus",
+    "Paper cup"                  : "kertas_kardus",
+    "Wrapping paper"             : "kertas_kardus",
+    "Paper straw"                : "kertas_kardus",
+    "Newspaper"                  : "kertas_kardus",
+    "Tissues"                    : "kertas_kardus",
+    "Magazine paper"             : "kertas_kardus",
 
     # METAL
-    "Metal"                      : "metal",
-    "Drink can"                  : "metal",
-    "Food can"                   : "metal",
-    "Aluminium foil"             : "metal",
-    "Metal bottle cap"           : "metal",
-    "Metal lid"                  : "metal",
-    "Pop tab"                    : "metal",
-    "Scrap metal"                : "metal",
-    "Aerosol"                    : "metal",
+    "Metal"                      : "logam",
+    "Drink can"                  : "logam",
+    "Food can"                   : "logam",
+    "Aluminium foil"             : "logam",
+    "Metal bottle cap"           : "logam",
+    "Metal lid"                  : "logam",
+    "Pop tab"                    : "logam",
+    "Scrap metal"                : "logam",
+    "Aerosol"                    : "logam",
 
     # GLASS
-    "Glass bottle"               : "glass",
-    "Glass cup"                  : "glass",
-    "Glass jar"                  : "glass",
-    "Broken glass"               : "glass",
-    "Other glass"                : "glass",
+    "Glass bottle"               : "kaca",
+    "Glass cup"                  : "kaca",
+    "Glass jar"                  : "kaca",
+    "Broken glass"               : "kaca",
+    "Other glass"                : "kaca",
 
     # TRASH (umum / campuran)
-    "Cigarette"                  : "trash",
-    "Food waste"                 : "trash",
-    "Rope & strings"             : "trash",
-    "Shoe"                       : "trash",
-    "Battery"                    : "trash",
-    "Blister pack"               : "trash",
-    "Other"                      : "trash",
-    "Unlabeled litter"           : "trash",
-    "Styrofoam piece"            : "trash",
-    "Plastic film canister"      : "trash",
-    "Foam cup"                   : "trash",
-    "Foam food container"        : "trash",
-    "Meal carton"                : "trash",
-    "Pizza box"                  : "trash",
-    "Drink carton"               : "trash",
+    "Cigarette"                  : "sampah",
+    "Food waste"                 : "sampah",
+    "Rope & strings"             : "sampah",
+    "Shoe"                       : "sampah",
+    "Battery"                    : "sampah",
+    "Blister pack"               : "sampah",
+    "Other"                      : "sampah",
+    "Unlabeled litter"           : "sampah",
+    "Styrofoam piece"            : "sampah",
+    "Plastic film canister"      : "sampah",
+    "Foam cup"                   : "sampah",
+    "Foam food container"        : "sampah",
+    "Meal carton"                : "sampah",
+    "Pizza box"                  : "sampah",
+    "Drink carton"               : "sampah",
 }
 
 # Mapping dari label Roboflow "Garbage Classification" ke kelas kita
 ROBOFLOW_LABEL_MAP = {
-    "cardboard"  : "paper_cardboard",
-    "glass"      : "glass",
-    "metal"      : "metal",
-    "paper"      : "paper_cardboard",
-    "plastic"    : "plastic",
-    "trash"      : "trash",
-    "organic"    : "trash",
-    "battery"    : "trash",
-    "clothes"    : "trash",
-    "shoes"      : "trash",
-    "white-glass": "glass",
-    "brown-glass": "glass",
-    "green-glass": "glass",
+    "cardboard"  : "kertas_kardus",
+    "glass"      : "kaca",
+    "metal"      : "logam",
+    "paper"      : "kertas_kardus",
+    "plastic"    : "plastik",
+    "trash"      : "sampah",
+    "organic"    : "sampah",
+    "battery"    : "sampah",
+    "clothes"    : "sampah",
+    "shoes"      : "sampah",
+    "white-glass": "kaca",
+    "brown-glass": "kaca",
+    "green-glass": "kaca",
 }
 
 
@@ -336,17 +339,17 @@ def map_label(label: str, source: str = "taco") -> Optional[str]:
             return v
     # Fallback: cek apakah ada kata kunci
     for keyword, cls in [
-        ("plastic", "plastic"),
-        ("bag", "plastic_bag"),
-        ("paper", "paper_cardboard"),
-        ("cardboard", "paper_cardboard"),
-        ("metal", "metal"),
-        ("can", "metal"),
-        ("glass", "glass"),
+        ("plastic", "plastik"),
+        ("bag", "kantong_plastik"),
+        ("paper", "kertas_kardus"),
+        ("cardboard", "kertas_kardus"),
+        ("metal", "logam"),
+        ("can", "logam"),
+        ("glass", "kaca"),
     ]:
         if keyword in label_lower:
             return cls
-    return "trash"  # default fallback
+    return "sampah"  # default fallback
 
 
 # ─── HELPER ────────────────────────────────────────────────────────────────────
@@ -357,6 +360,14 @@ def get_output_path(source: str, suffix: str = "") -> Path:
     return OUTPUT_DIR / f"{name}_{ts}{suffix}"
 
 
+def get_output_image_path(source: str, suffix: str = ".jpg") -> Path:
+    """Path khusus untuk hasil gambar berisi bounding box."""
+    ts   = datetime.now().strftime("%Y%m%d_%H%M%S")
+    name = Path(source).stem if source not in ("0", "webcam") else "webcam"
+    return OUTPUT_IMAGE_DIR / f"{name}_{ts}{suffix}"
+
+
 # Buat direktori output saat import
 from config import OUTPUT_DIR
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_IMAGE_DIR.mkdir(parents=True, exist_ok=True)

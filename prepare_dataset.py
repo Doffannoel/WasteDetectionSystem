@@ -475,7 +475,7 @@ def import_roboflow_yolo(
         if mapped and mapped in CLASS_NAMES:
             rf_to_ours[i] = CLASS_NAMES.index(mapped)
         else:
-            rf_to_ours[i] = CLASS_NAMES.index("trash")  # fallback
+            rf_to_ours[i] = CLASS_NAMES.index("sampah")  # fallback
 
     output_dir.mkdir(parents=True, exist_ok=True)
     labels_dir = output_dir / "labels"
@@ -618,12 +618,12 @@ nc: {len(CLASS_NAMES)}
 names: {CLASS_NAMES}
 
 # Catatan kelas:
-# 0 - plastic        : botol plastik, gelas plastik, wadah plastik
-# 1 - paper_cardboard: kertas, kardus, kotak
-# 2 - metal          : kaleng, logam, foil
-# 3 - glass          : botol kaca, pecahan kaca
-# 4 - plastic_bag    : kantong plastik, sachet, bungkus
-# 5 - trash          : sampah campuran, tidak teridentifikasi
+# 0 - plastik         : botol plastik, gelas plastik, wadah plastik
+# 1 - kertas_kardus   : kertas, kardus, kotak
+# 2 - logam           : kaleng, logam, foil
+# 3 - kaca            : botol kaca, pecahan kaca
+# 4 - kantong_plastik : kantong plastik, sachet, bungkus
+# 5 - sampah          : sampah campuran, tidak teridentifikasi
 """
     yaml_path.write_text(content)
     logger.info(f"âœ… Dataset YAML dibuat: {yaml_path}")
@@ -674,7 +674,7 @@ def analyze_dataset(dataset_dir: Path):
             "     - Gunakan class_weights di training\n"
             "     - Tambahkan augmentasi mosaic lebih agresif\n"
             "     - Pertimbangkan oversampling kelas minor\n"
-            "     - Atau gabungkan kelas yang sangat sedikit ke 'trash'"
+            "     - Atau gabungkan kelas yang sangat sedikit ke 'sampah'"
         )
 
 

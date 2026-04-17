@@ -8,12 +8,12 @@ val:   val/images
 test:  test/images
 
 nc: 6
-names: ['plastic', 'paper_cardboard', 'metal', 'glass', 'plastic_bag', 'trash']
+names: ['plastik', 'kertas_kardus', 'logam', 'kaca', 'kantong_plastik', 'sampah']
 
 # Catatan kelas:
-# 0 - plastic        : botol plastik, gelas plastik, wadah plastik
-# 1 - paper_cardboard: kertas, kardus, kotak
-# 2 - metal          : kaleng, logam, foil
-# 3 - glass          : botol kaca, pecahan kaca
-# 4 - plastic_bag    : kantong plastik, sachet, bungkus
-# 5 - trash          : sampah campuran, tidak teridentifikasi
+# 0 - plastik         : botol plastik, gelas plastik, wadah plastik
+# 1 - kertas_kardus   : kertas, kardus, kotak
+# 2 - logam           : kaleng, logam, foil
+# 3 - kaca            : botol kaca, pecahan kaca
+# 4 - kantong_plastik : kantong plastik, sachet, bungkus
+# 5 - sampah          : sampah campuran, tidak teridentifikasi
