@@ -58,7 +58,24 @@ def find_last_checkpoint() -> str | None:
     return None
 
 
-def train(resume: bool = False):
+def get_training_start_model(custom_model: str | None = None) -> str:
+    """
+    Tentukan model awal untuk training non-resume.
+
+    Prioritas:
+    1. model custom dari argumen CLI
+    2. models/best.pt jika sudah ada
+    3. BASE_MODEL
+    """
+    if custom_model:
+        return custom_model
+    if TRAINED_MODEL.exists():
+        logger.info(f"🧠 Melanjutkan fine-tune dari best model: {TRAINED_MODEL}")
+        return str(TRAINED_MODEL)
+    return BASE_MODEL
+
+
+def train(resume: bool = False, model_path_override: str | None = None):
     """
     Jalankan training YOLO.
     
@@ -75,10 +92,10 @@ def train(resume: bool = False):
             logger.info(f"🔄 Resume training dari: {model_path}")
         else:
             logger.warning("⚠️  Tidak ada checkpoint ditemukan, mulai dari awal.")
-            model_path = BASE_MODEL
+            model_path = get_training_start_model(model_path_override)
             resume     = False
     else:
-        model_path = BASE_MODEL
+        model_path = get_training_start_model(model_path_override)
 
     # Load model
     logger.info(f"📦 Load model: {model_path}")
@@ -260,7 +277,7 @@ def main():
     elif args.export:
         export_model(args.export)
     else:
-        results = train(resume=args.resume)
+        results = train(resume=args.resume, model_path_override=args.model)
         logger.info("\n🏁 Training selesai! Evaluasi pada test set...")
         evaluate()
         export_sample_predictions()
