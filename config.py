@@ -67,7 +67,7 @@ CLASS_COLORS = {
 # YOLOv8n -> lebih mature, banyak referensi, cocok production demo
 # YOLO11n -> arsitektur terbaru Ultralytics, sedikit lebih akurat, ekosistem berkembang
 BASE_MODEL      = "yolov8s.pt"   # model sedikit lebih besar untuk akurasi lebih baik
-TRAINED_MODEL   = MODEL_DIR / "best.pt"  # path model hasil training
+TRAINED_MODEL   = MODEL_DIR / "best_v2.pt"  # path model hasil training lanjutan
 DATASET_YAML    = DATASET_DIR / "waste_dataset.yaml"
 
 # ---------------- TRAINING ----------------
