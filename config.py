@@ -93,6 +93,7 @@ TRAIN_CONFIG = {
     "val"          : True,
     "save_period"  : 1,         # simpan checkpoint tiap epoch (buat aman saat runtime habis)
     # Augmentasi - penting untuk dataset sampah yang beragam
+    "amp"          : False,
     "hsv_h"        : 0.015,
     "hsv_s"        : 0.7,
     "hsv_v"        : 0.4,
