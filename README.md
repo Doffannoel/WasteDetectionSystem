@@ -1,4 +1,5 @@
 # Waste Detection System
+##### Oleh : Doffannoel Sihotang, I Dewa Made Adi Kresna, Iqbal Zahid
 
 Sistem deteksi sampah anorganik realtime berbasis YOLO untuk klasifikasi material sampah dari gambar, video, webcam, dan stream kamera. Proyek ini memakai gabungan dataset TACO dan Roboflow, lalu memetakan label ke kelas akhir berbahasa Indonesia.
 
