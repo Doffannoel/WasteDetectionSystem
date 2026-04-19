@@ -72,7 +72,7 @@ DATASET_YAML    = DATASET_DIR / "waste_dataset.yaml"
 
 # ---------------- TRAINING ----------------
 TRAIN_CONFIG = {
-    "epochs"       : 140,       # ditambah agar training punya waktu belajar lebih stabil
+    "epochs"       : 40,       # ditambah agar training punya waktu belajar lebih stabil
     "batch"        : 16,        # turunkan ke 8 jika RAM GPU < 4 GB
     "imgsz"        : 736,       # sedikit lebih besar untuk bantu detail objek
     "lr0"          : 0.01,      # learning rate awal
