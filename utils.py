@@ -14,7 +14,7 @@ from typing import Dict, List, Optional, Tuple
 import cv2
 import numpy as np
 
-from config import CLASS_COLORS, CLASS_NAMES, OUTPUT_CSV, OUTPUT_JSON, SAVE_CSV, SAVE_JSON
+from config import CLASS_COLORS, CLASS_NAMES, OUTPUT_CSV, OUTPUT_JSON, SAVE_CSV, SAVE_JSON, UNKNOWN_CLASS_NAME, INFERENCE_CONFIG
 
 # ─── LOGGING ───────────────────────────────────────────────────────────────────
 def setup_logger(name: str = "waste_detection", level: int = logging.INFO) -> logging.Logger:
@@ -44,12 +44,21 @@ def draw_detections(
     """
     Gambar bounding box, label, dan confidence (ditampilkan sebagai "Akurasi %") pada frame.
     
+    Fitur:
+    - Filter objek dengan confidence rendah (< low_conf_threshold)
+    - Tampilkan low-confidence detections sebagai "LAINNYA" atau skip
+    
     Returns:
         frame       — frame dengan anotasi
         count_dict  — jumlah deteksi per kelas
     """
     count_dict: Dict[str, int] = {}
     frame = frame.copy()
+    
+    # Ambil threshold dari config
+    low_conf_threshold = INFERENCE_CONFIG.get("low_conf_threshold", 0.5)
+    show_low_conf      = INFERENCE_CONFIG.get("show_low_conf", True)
+    filter_low_conf    = INFERENCE_CONFIG.get("filter_low_conf", False)
 
     for box in boxes:
         # Ambil koordinat, confidence, dan class id
@@ -57,11 +66,23 @@ def draw_detections(
         conf   = float(box.conf[0])
         cls_id = int(box.cls[0])
 
-        if cls_id >= len(class_names):
-            continue
-
-        cls_name = class_names[cls_id]
-        color    = CLASS_COLORS.get(cls_name, (0, 255, 0))
+        # ─── HANDLING LOW CONFIDENCE ───
+        if conf < low_conf_threshold:
+            if filter_low_conf:
+                # Skip — jangan tampilkan objek dengan confidence rendah
+                continue
+            elif show_low_conf:
+                # Tampilkan sebagai "LAINNYA"
+                cls_name = UNKNOWN_CLASS_NAME
+                color = (100, 100, 100)  # Warna abu-abu untuk unknown
+            else:
+                continue
+        else:
+            # Confidence cukup — gunakan class name dan color normal
+            if cls_id >= len(class_names):
+                continue
+            cls_name = class_names[cls_id]
+            color    = CLASS_COLORS.get(cls_name, (0, 255, 0))
 
         # Hitung jumlah per kelas
         count_dict[cls_name] = count_dict.get(cls_name, 0) + 1

@@ -72,13 +72,13 @@ DATASET_YAML    = DATASET_DIR / "waste_dataset.yaml"
 
 # â”€â”€â”€ TRAINING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 TRAIN_CONFIG = {
-    "epochs"       : 80,        # cukup untuk fine-tune; naikkan ke 150 kalau data banyak
+    "epochs"       : 150,        # cukup untuk fine-tune; naikkan ke 150 kalau data banyak
     "batch"        : 16,        # turunkan ke 8 jika RAM GPU < 4 GB
     "imgsz"        : 640,       # standar YOLO; turunkan ke 416 jika lambat
-    "lr0"          : 0.01,      # learning rate awal
+    "lr0"          : 0.02,      # learning rate awal
     "lrf"          : 0.01,      # final lr ratio
-    "momentum"     : 0.937,
-    "weight_decay" : 0.0005,
+    "momentum"     : 0.9,
+    "weight_decay" : 0.001,
     "warmup_epochs": 3,
     "patience"     : 20,        # early stopping
     "device"       : AUTO_DEVICE,
@@ -108,13 +108,20 @@ TRAIN_CONFIG = {
 
 # â”€â”€â”€ INFERENCE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 INFERENCE_CONFIG = {
-    "conf"     : 0.35,   # threshold confidence; turunkan ke 0.25 jika banyak miss
-    "iou"      : 0.45,   # IoU threshold untuk NMS
-    "imgsz"    : 640,
-    "max_det"  : 50,     # max deteksi per frame
-    "device"   : AUTO_DEVICE,  # ganti "0" jika ada GPU
-    "verbose"  : False,
+    "conf"              : 0.35,   # threshold confidence; turunkan ke 0.25 jika banyak miss
+    "iou"               : 0.45,   # IoU threshold untuk NMS
+    "imgsz"             : 640,
+    "max_det"           : 50,     # max deteksi per frame
+    "device"            : AUTO_DEVICE,  # ganti "0" jika ada GPU
+    "verbose"           : False,
+    # Filtering confidence rendah
+    "low_conf_threshold": 0.5,    # jika conf < ini, objek dianggap "LAINNYA"
+    "show_low_conf"     : True,    # tampilkan objek low-confidence sebagai "LAINNYA"
+    "filter_low_conf"   : False,   # True = jangan tampilkan, False = tampilkan as LAINNYA
 }
+
+# Nama untuk objek dengan confidence rendah
+UNKNOWN_CLASS_NAME = "LAINNYA"
 
 # â”€â”€â”€ OUTPUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 SAVE_CSV    = True
