@@ -67,7 +67,7 @@ CLASS_COLORS = {
 # YOLOv8n -> lebih mature, banyak referensi, cocok production demo
 # YOLO11n -> arsitektur terbaru Ultralytics, sedikit lebih akurat, ekosistem berkembang
 BASE_MODEL      = "yolov8s.pt"   # model sedikit lebih besar untuk akurasi lebih baik
-TRAINED_MODEL   = MODEL_DIR / "best_v2.pt"  # path model hasil training lanjutan
+TRAINED_MODEL   = MODEL_DIR / "best.pt"  # path model hasil training lanjutan
 DATASET_YAML    = DATASET_DIR / "waste_dataset.yaml"
 
 # ---------------- TRAINING ----------------
@@ -120,7 +120,17 @@ INFERENCE_CONFIG = {
     "ignore_classes" : ["sampah"],  # jangan tampilkan kelas ini
     "min_area_ratio" : 0.005,       # terlalu kecil -> buang
     "max_area_ratio" : 0.60,        # terlalu besar -> buang
+    # Filtering confidence rendah
+    "low_conf_threshold": 0.5,    # jika conf < ini, objek dianggap "LAINNYA"
+    "show_low_conf"     : True,    # tampilkan objek low-confidence sebagai "LAINNYA"
+    "filter_low_conf"   : False,   # True = jangan tampilkan, False = tampilkan as LAINNYA
+    # Remap kelas ke "LAINNYA"
+    "remap_to_unknown"  : ["sampah"],  # kelas-kelas yang ditampilkan sebagai "LAINNYA"
 }
+
+# Nama untuk objek dengan confidence rendah atau yang di-remap
+UNKNOWN_CLASS_NAME = "LAINNYA"
+
 
 # ---------------- OUTPUT ----------------
 SAVE_CSV    = True
