@@ -1,6 +1,6 @@
 # Waste Detection System
 
-Sistem deteksi sampah realtime berbasis YOLO untuk klasifikasi material sampah dari gambar, video, webcam, dan stream kamera. Proyek ini memakai gabungan dataset TACO dan Roboflow, lalu memetakan label ke kelas akhir berbahasa Indonesia.
+Sistem deteksi sampah anorganik realtime berbasis YOLO untuk klasifikasi material sampah dari gambar, video, webcam, dan stream kamera. Proyek ini memakai gabungan dataset TACO dan Roboflow, lalu memetakan label ke kelas akhir berbahasa Indonesia.
 
 ## Deskripsi Singkat
 
@@ -66,7 +66,7 @@ Model akhir memakai 6 kelas berikut.
 | 2 | `logam` |
 | 3 | `kaca` |
 | 4 | `kantong_plastik` |
-| 5 | `sampah` |
+| 5 | `lainnya` |
 
 ## Dataset
 
@@ -91,7 +91,7 @@ Contoh pemetaan label ke kelas final:
 | `metal`, `Drink can` | `logam` |
 | `glass`, `Glass bottle` | `kaca` |
 | `Plastic bag & wrapper` | `kantong_plastik` |
-| `trash`, `organic`, `Other` | `sampah` |
+| `trash`, `organic`, `Other` | `lainnya` |
 
 ## Instalasi
 
@@ -300,7 +300,7 @@ TRAIN_CONFIG = {
 ```python
 INFERENCE_CONFIG = {
     "conf": 0.50,
-    "ignore_classes": ["sampah"],
+    "ignore_classes": ["lainnya"],
 }
 ```
 
