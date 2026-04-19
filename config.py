@@ -108,10 +108,10 @@ TRAIN_CONFIG = {
 
 # â”€â”€â”€ INFERENCE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 INFERENCE_CONFIG = {
-    "conf"              : 0.35,   # threshold confidence; turunkan ke 0.25 jika banyak miss
+    "conf"              : 0.55,   # threshold confidence; turunkan ke 0.25 jika banyak miss
     "iou"               : 0.45,   # IoU threshold untuk NMS
     "imgsz"             : 640,
-    "max_det"           : 50,     # max deteksi per frame
+    "max_det"           : 20,     # max deteksi per frame
     "device"            : AUTO_DEVICE,  # ganti "0" jika ada GPU
     "verbose"           : False,
     # Filtering confidence rendah
