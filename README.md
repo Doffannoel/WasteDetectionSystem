@@ -1,336 +1,354 @@
-# 🗑️ Waste Detection System
+# Waste Detection System
+##### Oleh : Doffannoel Sihotang, I Dewa Made Adi Kresna, Iqbal Zahid
 
-Sistem deteksi sampah realtime berbasis **YOLOv8n** menggunakan dataset **TACO** + **Roboflow Garbage Classification**. Dibuat untuk kebutuhan demo, tugas akhir, dan prototype smart waste monitoring.
+Sistem deteksi sampah anorganik realtime berbasis YOLO untuk klasifikasi material sampah dari gambar, video, webcam, dan stream kamera. Proyek ini memakai gabungan dataset TACO dan Roboflow, lalu memetakan label ke kelas akhir berbahasa Indonesia.
 
----
+## Deskripsi Singkat
 
-## 📋 Deskripsi Proyek
+| Atribut | Detail |
+|---|---|
+| Model dasar | YOLOv8s |
+| Dataset | TACO + Roboflow Garbage Classification |
+| Kelas akhir | `plastik`, `kertas_kardus`, `logam`, `kaca`, `kantong_plastik`, `sampah` |
+| Input | Gambar, video, webcam, RTSP/CCTV |
+| Output | Bounding box realtime, CSV, JSON, video hasil, gambar hasil bbox |
+| Folder model | `models/` |
+| Folder output | `outputs/` dan `outputs/hasil_gambar_bbox/` |
 
-| Atribut       | Detail                                         |
-|---------------|------------------------------------------------|
-| Model         | YOLOv8n (bisa diganti YOLO11n)                 |
-| Dataset       | TACO + Roboflow Garbage Classification          |
-| Kelas         | 6 kelas (plastic, paper_cardboard, metal, glass, plastic_bag, trash) |
-| Input         | Gambar, video, webcam, RTSP/CCTV               |
-| Output        | Video anotasi + CSV + JSON                     |
-| Target device | Laptop CPU / GPU opsional                      |
+## Struktur Folder
 
----
-
-## 🏗️ Struktur Folder
-
+```text
+WasteDetectionSystem/
+|-- main.py
+|-- train.py
+|-- predict.py
+|-- prepare_dataset.py
+|-- config.py
+|-- utils.py
+|-- requirements.txt
+|-- README.md
+|
+|-- data/
+|   |-- taco/
+|   |-- taco_yolo/
+|   |-- roboflow_raw/
+|   `-- roboflow_yolo/
+|
+|-- datasets/
+|   |-- final/
+|   |   |-- train/
+|   |   |-- val/
+|   |   `-- test/
+|   `-- waste_dataset.yaml
+|
+|-- models/
+|   |-- best.pt
+|   `-- best_v2.pt
+|
+|-- runs/
+|   `-- waste_detection/
+|
+`-- outputs/
+    |-- detections.csv
+    |-- detections.json
+    |-- *.mp4
+    `-- hasil_gambar_bbox/
+        `-- sample_test/
 ```
-waste-detection/
-├── main.py               # Entry point interaktif (menu)
-├── train.py              # Pipeline training & evaluasi
-├── predict.py            # Inference (gambar/video/webcam/RTSP)
-├── prepare_dataset.py    # Download + konversi + merge dataset
-├── config.py             # Konfigurasi terpusat
-├── utils.py              # Fungsi utilitas & visualisasi
-├── requirements.txt
-├── README.md
-│
-├── data/
-│   ├── taco/             # Raw TACO dataset
-│   ├── taco_yolo/        # TACO setelah konversi ke YOLO format
-│   └── roboflow_yolo/    # Roboflow setelah konversi
-│
-├── datasets/
-│   ├── final/            # Dataset gabungan (train/val/test)
-│   └── waste_dataset.yaml
-│
-├── models/
-│   └── best.pt           # Trained model terbaik
-│
-├── runs/
-│   └── waste_detection/  # Log training, weights, plots
-│
-└── outputs/
-    ├── detections.csv
-    ├── detections.json
-    └── *.mp4             # Video hasil inference
-```
 
----
+## Kelas Deteksi
 
-## 📦 Dataset yang Digunakan
+Model akhir memakai 6 kelas berikut.
 
-### 1. TACO Dataset (Primary)
-- **Sumber**: [tacodataset.org](http://tacodataset.org/) / [GitHub](https://github.com/pedropro/TACO)
-- **Isi**: 1500+ foto sampah di lingkungan nyata (jalanan, pantai, taman)
-- **Format asli**: COCO JSON
-- **Anotasi**: 60+ kelas — disederhanakan menjadi 6 kelas
+| ID | Kelas |
+|---|---|
+| 0 | `plastik` |
+| 1 | `kertas_kardus` |
+| 2 | `logam` |
+| 3 | `kaca` |
+| 4 | `kantong_plastik` |
+| 5 | `lainnya` |
 
-### 2. Roboflow Garbage Classification (Supplementary)
-- **Sumber**: [Roboflow Universe](https://universe.roboflow.com/material-identification/garbage-classification-3)
-- **Isi**: Gambar sampah berlabel dengan variasi yang tinggi
-- **Format**: YOLOv8 (langsung kompatibel)
-- **Kelas**: cardboard, glass, metal, paper, plastic, trash
+## Dataset
 
-### Mapping Kelas
+### TACO
+- Sumber: `https://github.com/pedropro/TACO`
+- Format asli: COCO JSON
+- Dipakai sebagai sumber anotasi material sampah di lingkungan nyata
 
-| Kelas Final       | Dari TACO                          | Dari Roboflow     |
-|-------------------|------------------------------------|-------------------|
-| `plastic`         | Plastic bottle, cup, straw, dsb    | plastic           |
-| `paper_cardboard` | Paper, Cardboard, Paper bag        | paper, cardboard  |
-| `metal`           | Drink can, Food can, Aluminium foil| metal             |
-| `glass`           | Glass bottle, Broken glass         | glass             |
-| `plastic_bag`     | Single-use carrier bag, Film       | —                 |
-| `trash`           | Cigarette, Food waste, Unlabeled   | trash, organic    |
+### Roboflow Garbage Classification
+- Sumber: `https://universe.roboflow.com/material-identification/garbage-classification-3`
+- Format: YOLO
+- Dipakai sebagai sumber utama untuk menambah jumlah data dan variasi objek
 
----
+### Mapping Label
 
-## 🚀 Cara Memulai
+Contoh pemetaan label ke kelas final:
 
-### 1. Install Dependencies
+| Label Asli | Kelas Final |
+|---|---|
+| `plastic`, `Plastic bottle` | `plastik` |
+| `paper`, `cardboard` | `kertas_kardus` |
+| `metal`, `Drink can` | `logam` |
+| `glass`, `Glass bottle` | `kaca` |
+| `Plastic bag & wrapper` | `kantong_plastik` |
+| `trash`, `organic`, `Other` | `lainnya` |
+
+## Instalasi
+
+### Lokal
 
 ```bash
-# Clone atau ekstrak project
-cd waste-detection
-
-# Buat virtual environment (disarankan)
-python -m venv venv
-source venv/bin/activate      # Linux/Mac
-# atau
-venv\Scripts\activate         # Windows
-
-# Install dependencies
+python -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 2. Persiapan Dataset
+### Google Colab
 
-#### Opsi A: Download Otomatis (butuh API key Roboflow)
+```python
+from google.colab import drive
+drive.mount('/content/drive')
+
+%cd /content
+!rm -rf WasteDetectionSystem
+!git clone URL_REPO_KAMU WasteDetectionSystem
+%cd /content/WasteDetectionSystem
+!pip install -r requirements.txt
+!pip install ultralytics roboflow opencv-python-headless pillow pyyaml
+```
+
+## Persiapan Dataset
+
+### Otomatis dengan Roboflow API Key
+
 ```bash
-# Set Roboflow API key (gratis, daftar di roboflow.com)
-export ROBOFLOW_API_KEY=your_api_key_here   # Linux/Mac
-# atau
-set ROBOFLOW_API_KEY=your_api_key_here      # Windows
-
-# Jalankan script persiapan
+set ROBOFLOW_API_KEY=api_key_anda
 python prepare_dataset.py
 ```
 
-#### Opsi B: Download Manual
-1. **TACO**: 
-   - Kunjungi https://github.com/pedropro/TACO
-   - Download `annotations.json`
-   - Download images menggunakan `data/download_dataset.py --round all`
-   - Taruh di `data/taco/`
+Di Colab:
 
-2. **Roboflow**:
-   - Kunjungi https://universe.roboflow.com/material-identification/garbage-classification-3
-   - Klik **Export Dataset** → Format: **YOLOv8** → Download ZIP
-   - Ekstrak ke `data/roboflow_raw/`
+```python
+import os
+os.environ["ROBOFLOW_API_KEY"] = "api_key_anda"
+!python prepare_dataset.py
+```
 
-3. Jalankan ulang:
-   ```bash
-   python prepare_dataset.py
-   ```
+### Output Dataset
 
-### 3. Training Model
+Kalau sukses, folder berikut akan terbentuk:
+
+```text
+datasets/final/train/images
+datasets/final/train/labels
+datasets/final/val/images
+datasets/final/val/labels
+datasets/final/test/images
+datasets/final/test/labels
+```
+
+## Training
+
+### Training dari model dasar
 
 ```bash
-# Training standard (80 epoch)
 python train.py
+```
 
-# Resume jika training terputus
+Mode ini akan:
+- memakai `models/best_v2.pt` jika sudah ada
+- kalau belum ada, memakai `models/best.pt`
+- kalau keduanya belum ada, fallback ke `BASE_MODEL` di `config.py`
+
+### Resume checkpoint lama
+
+```bash
 python train.py --resume
-
-# Hanya evaluasi (setelah ada model)
-python train.py --eval
-
-# Dengan monitoring GPU
-watch -n 1 nvidia-smi   # di terminal lain (Linux)
 ```
 
-> **Estimasi waktu training:**
-> - CPU (laptop biasa): ~4-8 jam untuk 80 epoch
-> - GPU RTX 3060: ~30-45 menit
-> - Google Colab (T4): ~1-2 jam
+Catatan:
+- `--resume` mengikuti state checkpoint `last.pt`
+- total epoch akan mengikuti checkpoint lama, bukan angka epoch baru di `config.py`
+- gunakan mode ini hanya jika Anda memang ingin melanjutkan run lama apa adanya
 
-### 4. Inference
-
-#### Webcam Realtime
-```bash
-python predict.py --source 0
-```
-
-#### Video File
-```bash
-python predict.py --source data/test_video.mp4
-```
-
-#### Gambar
-```bash
-python predict.py --source foto_sampah.jpg
-```
-
-#### CCTV / RTSP
-```bash
-python predict.py --source "rtsp://admin:password@192.168.1.100:554/stream"
-```
-
-#### Opsi Tambahan
-```bash
-# Ubah confidence threshold (lebih rendah = lebih banyak deteksi)
-python predict.py --source 0 --conf 0.25
-
-# Headless (tanpa preview, untuk server)
-python predict.py --source video.mp4 --no-show
-
-# Jangan simpan output
-python predict.py --source 0 --no-save --no-csv --no-json
-```
-
-### 5. Menu Interaktif
+### Evaluasi saja
 
 ```bash
-python main.py
+python train.py --eval --model models/best_v2.pt
 ```
 
----
+### Export model
 
-## 📊 Cara Melihat Output
-
-### File CSV (`outputs/detections.csv`)
-```
-timestamp,source,class_name,count,total_objects
-2024-01-15T14:30:22,0,plastic,3,5
-2024-01-15T14:30:22,0,metal,2,5
+```bash
+python train.py --export onnx
 ```
 
-### File JSON (`outputs/detections.json`)
-```json
-[
-  {
-    "timestamp": "2024-01-15T14:30:22",
-    "source": "0",
-    "total_objects": 5,
-    "counts": {"plastic": 3, "metal": 2},
-    "detections": [
-      {
-        "class_id": 0,
-        "class_name": "plastic",
-        "confidence": 0.8712,
-        "bbox": {"x1": 120, "y1": 80, "x2": 340, "y2": 290}
-      }
-    ]
-  }
-]
+## Evaluasi dan Confusion Matrix
+
+Untuk menampilkan confusion matrix dan plot evaluasi:
+
+```bash
+python train.py --eval --model models/best_v2.pt
 ```
 
-### Analisis dengan Pandas
+Hasil evaluasi biasanya tersimpan di:
+
+```text
+runs/detect/val/
+```
+
+File penting yang biasanya muncul:
+- `confusion_matrix.png`
+- `confusion_matrix_normalized.png`
+- `F1_curve.png`
+- `PR_curve.png`
+- `P_curve.png`
+- `R_curve.png`
+
+## Inference
+
+### Webcam
+
+```bash
+python predict.py --model models/best_v2.pt --source 0
+```
+
+### Gambar
+
+```bash
+python predict.py --model models/best_v2.pt --source contoh.jpg
+```
+
+### Video
+
+```bash
+python predict.py --model models/best_v2.pt --source video.mp4
+```
+
+### Folder gambar
+
+```bash
+python predict.py --model models/best_v2.pt --source folder_gambar
+```
+
+### RTSP / CCTV / Kamera HP
+
+```bash
+python predict.py --model models/best_v2.pt --source "rtsp://user:pass@ip:port/stream"
+```
+
+Atau jika memakai DroidCam / IP camera:
+
+```bash
+python predict.py --model models/best_v2.pt --source "http://IP_KAMERA/video"
+```
+
+## Output Hasil
+
+### Realtime
+- bounding box tampil langsung di window preview
+- label tampil dalam Bahasa Indonesia
+- confidence tampil sebagai `Akurasi`
+
+### File hasil
+
+Output tersimpan ke:
+
+```text
+outputs/
+outputs/hasil_gambar_bbox/
+outputs/hasil_gambar_bbox/sample_test/
+```
+
+Jenis file:
+- `detections.csv`
+- `detections.json`
+- `*.mp4` hasil video inference
+- `*.jpg` hasil gambar dengan bounding box
+
+### Contoh output gambar setelah training
+
+Setelah `python train.py` selesai, script akan otomatis menyimpan beberapa contoh hasil prediksi test set ke:
+
+```text
+outputs/hasil_gambar_bbox/sample_test/
+```
+
+Folder ini cocok untuk bukti visual laporan atau presentasi.
+
+## Konfigurasi Penting
+
+File utama konfigurasi ada di [config.py](./config.py).
+
+Yang paling sering diubah:
+
 ```python
-import pandas as pd
-
-df = pd.read_csv("outputs/detections.csv")
-df["timestamp"] = pd.to_datetime(df["timestamp"])
-
-# Total per kelas
-print(df.groupby("class_name")["count"].sum())
-
-# Trend per waktu
-df.set_index("timestamp").resample("1min")["total_objects"].mean().plot()
+BASE_MODEL = "yolov8s.pt"
+TRAINED_MODEL = MODEL_DIR / "best_v2.pt"
 ```
 
----
-
-## ⚙️ Cara Modifikasi Kelas
-
-### Ubah daftar kelas
-Di `config.py`:
 ```python
-CLASS_NAMES = [
-    "plastic",
-    "paper_cardboard",
-    "metal",
-    "glass",
-    "plastic_bag",
-    "trash",
-    # Tambah kelas baru di sini
-]
-```
-
-### Update mapping label
-Di `utils.py`, tambahkan ke `TACO_LABEL_MAP` atau `ROBOFLOW_LABEL_MAP`:
-```python
-TACO_LABEL_MAP = {
-    "Plastic bottle": "plastic",
-    "My New Label"  : "kelas_baru",  # tambahkan mapping
-    ...
+TRAIN_CONFIG = {
+    "epochs": 40,
+    "batch": 16,
+    "imgsz": 736,
+    "save_period": 1,
 }
 ```
 
-Setelah ubah kelas, jalankan ulang `prepare_dataset.py` dan `train.py`.
-
----
-
-## 🔧 Troubleshooting
-
-| Masalah                        | Solusi                                                        |
-|-------------------------------|---------------------------------------------------------------|
-| FPS rendah di laptop           | Kurangi `imgsz` ke 416 di `config.py`                        |
-| Banyak false positive          | Naikkan `conf` ke 0.5 di `INFERENCE_CONFIG`                  |
-| Banyak miss detection          | Turunkan `conf` ke 0.2                                        |
-| OOM (out of memory) training   | Turunkan `batch` ke 8                                         |
-| Training lambat di CPU         | Normal. Gunakan Google Colab untuk training, lalu download model |
-| Webcam tidak terbuka           | Coba `--source 1` atau `--source 2`                          |
-| CUDA error                     | Set `device: "cpu"` di `INFERENCE_CONFIG`                    |
-
----
-
-## 📈 Cara Upgrade Proyek
-
-### 1. Gunakan model yang lebih besar
 ```python
-# Di config.py, ubah:
-BASE_MODEL = "yolov8s.pt"  # small — lebih akurat, sedikit lebih lambat
-# atau
-BASE_MODEL = "yolov8m.pt"  # medium — untuk server/cloud
+INFERENCE_CONFIG = {
+    "conf": 0.50,
+    "ignore_classes": ["lainnya"],
+}
 ```
 
-### 2. Tambah dataset lebih banyak
-- [Open Images Dataset V6](https://storage.googleapis.com/openimages/web/index.html) — kelas "Tin can", "Bottle", dsb
-- [MJU-Waste](https://github.com/realwecan/mju-waste)
-- Foto sendiri dengan LabelImg atau Roboflow Annotate
+## Saran Alur Kerja
 
-### 3. Deploy ke web/mobile
-```bash
-# Export ke ONNX
-python train.py --export onnx
+Untuk Colab yang sering putus, alur paling aman:
 
-# Gunakan untuk inference tanpa GPU
-onnxruntime inference: model.onnx
-```
+1. Jalankan `prepare_dataset.py`
+2. Jalankan `python train.py`
+3. Backup `runs/`, `models/`, dan `datasets/` ke Drive
+4. Kalau pindah akun Colab, restore semua folder itu
+5. Gunakan `--resume` hanya jika benar-benar ingin melanjutkan run checkpoint lama
+6. Untuk fine-tuning tambahan, lebih aman pakai `python train.py` biasa dari model `best_v2.pt`
 
-### 4. Integrasi MQTT / IoT
+## Backup ke Google Drive
+
 ```python
-import paho.mqtt.client as mqtt
-# Publish count_dict ke broker MQTT setiap frame
+!mkdir -p /content/drive/MyDrive/waste_backup/datasets
+!mkdir -p /content/drive/MyDrive/waste_backup/runs
+!mkdir -p /content/drive/MyDrive/waste_backup/models
+
+!rsync -a /content/WasteDetectionSystem/datasets/ /content/drive/MyDrive/waste_backup/datasets/
+!rsync -a /content/WasteDetectionSystem/runs/ /content/drive/MyDrive/waste_backup/runs/
+!rsync -a /content/WasteDetectionSystem/models/ /content/drive/MyDrive/waste_backup/models/
 ```
 
----
+## Troubleshooting
 
-## ⚠️ Keterbatasan & Catatan
+| Masalah | Penyebab umum | Solusi |
+|---|---|---|
+| `datasets/final` tidak ada | dataset gagal diprepare | jalankan lagi `python prepare_dataset.py` |
+| Roboflow 401 | API key tidak valid | set `ROBOFLOW_API_KEY` yang benar |
+| path YAML jadi Windows path di Colab | YAML dibuat di lokal | tulis ulang `datasets/waste_dataset.yaml` dengan path `/content/...` |
+| resume tetap ikut epoch lama | checkpoint menyimpan total epoch lama | jangan pakai `--resume`, pakai `python train.py` biasa |
+| webcam tidak terbuka | index kamera salah | coba `--source 1` atau `--source 2` |
+| inference wajah terdeteksi sampah | false positive | naikkan `conf`, pakai filter kelas dan box area |
 
-1. **Pencahayaan buruk** — Model kurang akurat di kondisi malam atau backlight. Saran: tambahkan data augmentasi dengan brightness variation.
+## Catatan
 
-2. **Occlusion** — Sampah yang saling tumpang tindih sulit terdeteksi. Saran: aktifkan `copy_paste` augmentation.
+- `best.pt` bisa dipakai sebagai model hasil training lama
+- `best_v2.pt` dipakai untuk model hasil training lanjutan
+- saat training non-resume, epoch di log memang mulai lagi dari 1, tetapi bobot model tetap berasal dari model hasil training sebelumnya
 
-3. **Objek kecil** — Puntung rokok atau sachet kecil sering terlewat. Saran: naikkan resolusi ke 1280 atau gunakan SAHI (Slicing Aided Hyper Inference).
+## Penutup
 
-4. **Dataset mismatch** — TACO diambil di luar negeri, gambar mungkin berbeda dengan sampah lokal Indonesia. Saran: tambahkan foto lokal.
-
-5. **Class imbalance** — Beberapa kelas seperti `glass` mungkin jumlah datanya sedikit. Saran: aktifkan `class_weights` atau augment agresif kelas minor.
-
----
-
-## 📝 Lisensi
-
-MIT License. Dataset TACO dan Roboflow memiliki lisensi masing-masing — cek website resmi sebelum penggunaan komersial.
-
----
-
-*Dibuat untuk keperluan mata kuliah Big Data in Social Media Campaign.*
-*"Doffannoel Sihotang, I Dewa Made Adi Kresna, Iqbal Zahid Abdullah Haris" 🧘*
+Proyek ini cocok untuk demo deteksi sampah material berbasis computer vision, eksperimen fine-tuning YOLO, dan bahan presentasi karena sudah mendukung:
+- label Bahasa Indonesia
+- confusion matrix evaluasi
+- output visual bounding box
+- workflow lokal maupun Google Colab
