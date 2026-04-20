@@ -157,9 +157,8 @@ datasets/final/test/labels
 python train.py
 ```
 
-Mode ini akan:
-- memakai `models/best_v2.pt` jika sudah ada
-- kalau belum ada, memakai `models/best.pt`
+Model ini akan:
+- memakai `models/best.pt`
 - kalau keduanya belum ada, fallback ke `BASE_MODEL` di `config.py`
 
 ### Resume checkpoint lama
@@ -209,40 +208,46 @@ File penting yang biasanya muncul:
 
 ## Inference
 
+### Menuju GUI buatan kami
+
+```bash
+python predict.py
+```
+
 ### Webcam
 
 ```bash
-python predict.py --model models/best_v2.pt --source 0
+python predict.py --source 0
 ```
 
 ### Gambar
 
 ```bash
-python predict.py --model models/best_v2.pt --source contoh.jpg
+python predict.py --source contoh.jpg
 ```
 
 ### Video
 
 ```bash
-python predict.py --model models/best_v2.pt --source video.mp4
+python predict.py --source video.mp4
 ```
 
 ### Folder gambar
 
 ```bash
-python predict.py --model models/best_v2.pt --source folder_gambar
+python predict.py --source folder_gambar
 ```
 
 ### RTSP / CCTV / Kamera HP
 
 ```bash
-python predict.py --model models/best_v2.pt --source "rtsp://user:pass@ip:port/stream"
+python predict.py --source "rtsp://user:pass@ip:port/stream"
 ```
 
 Atau jika memakai DroidCam / IP camera:
 
 ```bash
-python predict.py --model models/best_v2.pt --source "http://IP_KAMERA/video"
+python predict.py --source "http://IP_KAMERA/video"
 ```
 
 ## Output Hasil
@@ -286,7 +291,7 @@ Yang paling sering diubah:
 
 ```python
 BASE_MODEL = "yolov8s.pt"
-TRAINED_MODEL = MODEL_DIR / "best_v2.pt"
+TRAINED_MODEL = MODEL_DIR / "best.pt"
 ```
 
 ```python
@@ -314,7 +319,7 @@ Untuk Colab yang sering putus, alur paling aman:
 3. Backup `runs/`, `models/`, dan `datasets/` ke Drive
 4. Kalau pindah akun Colab, restore semua folder itu
 5. Gunakan `--resume` hanya jika benar-benar ingin melanjutkan run checkpoint lama
-6. Untuk fine-tuning tambahan, lebih aman pakai `python train.py` biasa dari model `best_v2.pt`
+6. Untuk fine-tuning tambahan, lebih aman pakai `python train.py` biasa dari model `best.pt`
 
 ## Backup ke Google Drive
 
@@ -341,8 +346,7 @@ Untuk Colab yang sering putus, alur paling aman:
 
 ## Catatan
 
-- `best.pt` bisa dipakai sebagai model hasil training lama
-- `best_v2.pt` dipakai untuk model hasil training lanjutan
+- `best.pt` bisa dipakai sebagai model hasil training
 - saat training non-resume, epoch di log memang mulai lagi dari 1, tetapi bobot model tetap berasal dari model hasil training sebelumnya
 
 ## Penutup
