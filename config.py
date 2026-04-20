@@ -110,7 +110,7 @@ TRAIN_CONFIG = {
 
 # ---------------- INFERENCE ----------------
 INFERENCE_CONFIG = {
-    "conf"     : 0.50,   # threshold confidence; naikan untuk kurangi false positive
+    "conf"     : 0.35,   # threshold confidence; naikan untuk kurangi false positive
     "iou"      : 0.45,   # IoU threshold untuk NMS
     "imgsz"    : 640,
     "max_det"  : 50,     # max deteksi per frame
@@ -121,7 +121,7 @@ INFERENCE_CONFIG = {
     "min_area_ratio" : 0.005,       # terlalu kecil -> buang
     "max_area_ratio" : 0.60,        # terlalu besar -> buang
     # Filtering confidence rendah
-    "low_conf_threshold": 0.5,    # jika conf < ini, objek dianggap "LAINNYA"
+    "low_conf_threshold": 0.35,    # jika conf < ini, objek dianggap "LAINNYA"
     "show_low_conf"     : True,    # tampilkan objek low-confidence sebagai "LAINNYA"
     "filter_low_conf"   : False,   # True = jangan tampilkan, False = tampilkan as LAINNYA
     # Remap kelas ke "LAINNYA"
